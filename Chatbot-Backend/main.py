@@ -14,9 +14,7 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 app = Flask(__name__)
-
-# UPDATED: Allow both localhost and deployed frontend
-CORS(app, origins=["http://localhost:3000", "https://ai-study-platform-ty.vercel.app"])
+CORS(app, origins=["http://localhost:3000"])
 
 # Predefined answers
 predefined_answers = {
@@ -58,7 +56,6 @@ def chat():
                 if filename.endswith(('.txt', '.py', '.js', '.html', '.css', '.java', '.cpp', '.c')):
                     file_content = uploaded_file.read().decode('utf-8', errors='ignore')
                     user_message += f"\n\nFile content ({uploaded_file.filename}):\n{file_content}"
-
                 elif filename.endswith(('.jpg', '.jpeg', '.png', '.gif')):
                     image_data = uploaded_file.read()
                     image_base64 = base64.b64encode(image_data).decode('utf-8')
@@ -69,7 +66,6 @@ def chat():
                             "data": image_base64
                         }
                     }
-
                 elif filename.endswith('.pdf'):
                     try:
                         doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
@@ -79,10 +75,8 @@ def chat():
                         user_message += f"\n\nExtracted text from PDF ({uploaded_file.filename}):\n{pdf_text}"
                     except Exception as e:
                         user_message += f"\n\n[Error extracting text from PDF: {str(e)}]"
-
                 else:
                     user_message += f"\n\n[File uploaded: {uploaded_file.filename}]"
-
             except Exception as e:
                 return jsonify({"error": f"Error reading file: {str(e)}"}), 400
 
@@ -98,11 +92,13 @@ def chat():
         enhanced_message = f"""You are EduMentor AI, a helpful study chatbot for Computer Science students.
 Your goal is to provide clear, focused answers for educational questions related to programming and computer science.
 Avoid comparing answers to other programming languages unless explicitly asked.
-Use clean formatting, and when showing code, wrap it in triple backticks (```). 
+Use clean formatting, and when showing code, wrap it in triple backticks (```).
 
 User Query: {user_message}"""
 
-        # Gemini API
+        # Gemini API (updated model recommended)
+        # You can switch between these:
+        # model_name = "gemini-2.0-flash"
         model_name = "gemini-2.5-flash"
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={GEMINI_API_KEY}"
@@ -119,29 +115,34 @@ User Query: {user_message}"""
 
         headers = {"Content-Type": "application/json"}
 
-        # Gemini API call with error handling
+        # ---- Gemini API call with error handling ----
         try:
             response = requests.post(url, json=payload, headers=headers)
             data = response.json()
 
+            # Debug log
             print("Gemini API raw response:", data)
 
+            # If Gemini returned an error (quota, invalid key, etc.)
             if "error" in data:
                 error_info = data["error"]
                 status = error_info.get("status", "")
                 message = error_info.get("message", "")
 
+                # Quota / rate-limit / resource exhausted
                 if status == "RESOURCE_EXHAUSTED":
                     return jsonify({
                         "error": "Gemini API quota exceeded. Please try again later.",
                         "details": message
                     }), 503
 
+                # Other Gemini error
                 return jsonify({
                     "error": "Gemini API returned an error.",
                     "details": error_info
                 }), 500
 
+            # Normal success response
             if "candidates" not in data:
                 return jsonify({
                     "error": "No response from Gemini API",
@@ -152,6 +153,7 @@ User Query: {user_message}"""
             return jsonify({"reply": text_reply})
 
         except requests.exceptions.RequestException as e:
+            # Network / connection error with Gemini API
             print("Error calling Gemini API:", str(e))
             return jsonify({"error": "Failed to connect to Gemini API"}), 502
 
@@ -159,8 +161,10 @@ User Query: {user_message}"""
         print("Error Traceback:", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
-
-# UPDATED FOR RENDER DEPLOYMENT
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
+
+
+#  python main.py              
+
+
