@@ -6,7 +6,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Plus, Mic, MicOff } from "lucide-react";
 
-const Chatbot = () => {
+const chatbot = () => {
   const welcomeMessage =
     "Hi! I'm **EduMentor AI** 🤖, your study buddy for Computer Science. Do you have any **doubts in HTML, Java, Python,** or any other topic? Just ask me anything — I'm here to help you learn and solve problems!";
 
@@ -620,4 +620,4 @@ const Chatbot = () => {
   );
 };
 
-export default Chatbot;
+export default chatbot;

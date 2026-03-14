@@ -165,6 +165,14 @@ const categoryColors = {
 };
 
 const FloatingParticles = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {[...Array(15)].map((_, i) => (

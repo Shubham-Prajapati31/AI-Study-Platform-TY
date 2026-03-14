@@ -1,12 +1,12 @@
 import HRQuestionsPage from '@/compoenent/Interview-Pre-Content/hr-questions'
 import React from 'react'
 
-const page = () => {
+const Page = () => {
   return (
     <div>
-        <HRQuestionsPage />
+        <HRQuestionsPage/>
     </div>
   )
 }
 
-export default page
+export default Page

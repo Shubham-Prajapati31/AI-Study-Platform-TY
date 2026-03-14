@@ -1,11 +1,12 @@
+import InterviewPrep from '@/compoenent/Interviewpre'
 import React from 'react'
 
-const page = () => {
+const Page = () => {
   return (
     <div>
-        <InterviewPrep />
+        <InterviewPrep/>
     </div>
   )
 }
 
-export default page
+export default Page

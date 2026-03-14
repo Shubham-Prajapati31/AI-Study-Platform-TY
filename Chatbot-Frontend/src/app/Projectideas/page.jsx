@@ -1,6 +1,7 @@
+import ProjectIdeas from '@/compoenent/Projectideas'
 import React from 'react'
 
-const page = () => {
+const Page = () => {
   return (
     <div>
         <ProjectIdeas/>
